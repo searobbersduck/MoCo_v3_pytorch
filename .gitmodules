@@ -1,0 +1,6 @@
+[submodule "external_lib/moco"]
+	path = external_lib/moco
+	url = https://github.com/facebookresearch/moco.git
+[submodule "external_lib/vit-pytorch"]
+	path = external_lib/vit-pytorch
+	url = https://github.com/lucidrains/vit-pytorch.git
