@@ -21,9 +21,15 @@ source activate mocov3
 
 ## train
 
+only use visual transformer as backbone, run as follows:
+
 ```
-CUDA_VISIBLE_DEVICES=6 python main_mocov3.py -a resnet18 --lr 0.03 --batch-size 1 --dist-url 'tcp://localhost:10003' --multiprocessing-distributed --world-size 1 --rank 0 --moco-k 65536  --epochs 10 /your_data_root
+CUDA_VISIBLE_DEVICES=6 python main_mocov2_vit.py -a resnet18 --lr 0.03 --batch-size 1 --dist-url 'tcp://localhost:10003' --multiprocessing-distributed --world-size 1 --rank 0 --moco-k 65536  --epochs 10 /your_data_root
 ```
+
+train moco v3:
+
+todo:
 
 ### use your datasets
 
