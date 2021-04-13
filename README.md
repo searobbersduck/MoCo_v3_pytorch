@@ -1,7 +1,8 @@
 # MoCo_v3_pytorch
-a pytorch implementation for MoCo V3
 
 an unofficial implemenation of [moco v3](https://arxiv.org/pdf/2104.02057.pdf).
+
+[An Empirical Study of Training Self-Supervised Vision Transformers](https://arxiv.org/pdf/2104.02057.pdf)
 
 ## reference link
 
@@ -11,6 +12,11 @@ an unofficial implemenation of [moco v3](https://arxiv.org/pdf/2104.02057.pdf).
 
 ```
 git submodule update --init --recursive
+```
+
+```
+conda create --name mocov3 --file requirements.txt
+source activate mocov3
 ```
 
 ## train
