@@ -8,7 +8,7 @@ import numpy as np
 from torch.utils.data import Dataset
 
 class ToyDS(Dataset):
-    def __init__(self, shape=[256,256], n_class=10, n_num=1000):
+    def __init__(self, shape=[3,256,256], n_class=10, n_num=1000):
         self.shape = shape
         self.n_class = n_class
         self.n_num = n_num
@@ -17,10 +17,11 @@ class ToyDS(Dataset):
         return self.n_num
 
     def __getitem__(self, item):
-        image = torch.randn(self.shape)
+        image_aug1 = torch.randn(self.shape)
+        image_aug2 = torch.randn(self.shape)
         label = np.random.randint(0, self.n_class)
 
-        return image, label
+        return [image_aug1, image_aug2, label]
 
 
 def test_ToyDS():
@@ -28,7 +29,7 @@ def test_ToyDS():
     ds = ToyDS()
     dataloader = DataLoader(ds, batch_size=2)
 
-    for index, (images, labels) in enumerate(dataloader):
+    for index, (images) in enumerate(dataloader):
         if index > 10:
             break
         print(images.shape,'\t', labels)

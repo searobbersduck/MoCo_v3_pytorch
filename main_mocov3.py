@@ -175,7 +175,7 @@ def main_worker(gpu, ngpus_per_node, args):
     v = ViT(
         image_size = 256,
         patch_size = 32,
-        num_classes = 10,
+        num_classes = args.moco_dim,
         dim = 1024,
         depth = 6,
         heads = 16,
@@ -186,7 +186,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     import torchvision
 
-    model = mocov3.builder.MoCo(
+    model = mocov3.builder.MoCoV3(
         v,
         args.moco_dim, args.moco_k, args.moco_m, args.moco_t, args.mlp)
 
@@ -276,9 +276,9 @@ def main_worker(gpu, ngpus_per_node, args):
             normalize
         ]
 
-    train_dataset = datasets.ImageFolder(
-        traindir,
-        moco.loader.TwoCropsTransform(transforms.Compose(augmentation)))
+    # train_dataset = datasets.ImageFolder(
+    #     traindir,
+    #     moco.loader.TwoCropsTransform(transforms.Compose(augmentation)))
 
     train_dataset = ToyDS()
 
@@ -308,6 +308,14 @@ def main_worker(gpu, ngpus_per_node, args):
                 'optimizer' : optimizer.state_dict(),
             }, is_best=False, filename='checkpoint_{:04d}.pth.tar'.format(epoch))
 
+# ref: https://github.com/CupidJay/MoCov3-pytorch/blob/main/main_moco_pretraining_v3.py
+def ctr(q, k, criterion, tau):
+    logits = torch.mm(q, k.t())
+    N = q.size(0)
+    labels = range(N)
+    labels = torch.LongTensor(labels).cuda()
+    loss = criterion(logits/tau, labels)
+    return 2*tau*loss
 
 def train(train_loader, model, criterion, optimizer, epoch, args):
     batch_time = AverageMeter('Time', ':6.3f')
@@ -324,7 +332,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     model.train()
 
     end = time.time()
-    for i, (images, _) in enumerate(train_loader):
+    for i, (images) in enumerate(train_loader):
         # measure data loading time
         data_time.update(time.time() - end)
 
@@ -333,15 +341,15 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
             images[1] = images[1].cuda(args.gpu, non_blocking=True)
 
         # compute output
-        output, target = model(im_q=images[0], im_k=images[1])
-        loss = criterion(output, target)
+        q1,q2,k1,k2 = model(x1=images[0], x2=images[1])
+        loss = ctr(q1, k2, criterion, args.moco_t) + ctr(q2, k1, criterion, args.moco_t)
 
         # acc1/acc5 are (K+1)-way contrast classifier accuracy
         # measure accuracy and record loss
-        acc1, acc5 = accuracy(output, target, topk=(1, 5))
+        # acc1, acc5 = accuracy(output, target, topk=(1, 5))
         losses.update(loss.item(), images[0].size(0))
-        top1.update(acc1[0], images[0].size(0))
-        top5.update(acc5[0], images[0].size(0))
+        # top1.update(acc1[0], images[0].size(0))
+        # top5.update(acc5[0], images[0].size(0))
 
         # compute gradient and do SGD step
         optimizer.zero_grad()

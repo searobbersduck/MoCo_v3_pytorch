@@ -29,7 +29,9 @@ CUDA_VISIBLE_DEVICES=6 python main_mocov2_vit.py -a resnet18 --lr 0.03 --batch-s
 
 train moco v3:
 
-todo:
+```
+CUDA_VISIBLE_DEVICES=6 python main_mocov3_vit.py -a resnet18 --lr 0.03 --batch-size 4096 --dist-url 'tcp://localhost:10003' --multiprocessing-distributed --world-size 1 --rank 0 --moco-k 65536  --epochs 10 /your_data_root
+```
 
 ### use your datasets
 
